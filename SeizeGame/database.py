@@ -14,3 +14,9 @@ Client_2 = motor_asynio.asyncIOMotorClient(config.MONGO_DB_UPDATE_URI)
 db_2 = Client_2['Charector_catcher']
 
 user_collection = db["user_collection_lmaoooo"]
+
+
+
+
+
+#========================================
