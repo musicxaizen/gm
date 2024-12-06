@@ -61,7 +61,7 @@ async def nguess(update: Update, context: CallbackContext):
         nobi_charector = random_character["collection"]
         character_name = random_character["charector_name"]
 
-        await Context.not.send_photo(nobi_charector, caption="✨🌟 Who is this Mysterious Character?? 🧐🌟✨")
+        await Context.bot.send_photo(nobi_charector, caption="✨🌟 Who is this Mysterious Character?? 🧐🌟✨")
 
         start_time = asyncio.get_event_loop().time()
         while True:
