@@ -28,7 +28,7 @@ def main():
     
     dp.add_handler(CommandHandler("upload", upload))
 
-dp.add_handler(CommandHandler(Filters.text, name))
+     dp.add_handler(CommandHandler(Filters.text, name))
     
     
     
