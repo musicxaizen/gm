@@ -21,5 +21,5 @@ LOGGER_ID = int(getenv("-1002342285813"))
 MONGO_DB_URI = getenv("")
 #---------------------------------------------------------
 #update coin mongodb url
-MONGO_DB_UPDATATE_URI = getenv("")
+MONGO_DB_UPDATATE_URI = getenv("mongodb+srv://shivaiaxz:YfVBSatihAQlPAXc@cluster0.rqcpm.mongodb.net/?retryWrites=true&w=majority")
 #---------------------------------------------------------
