@@ -52,7 +52,7 @@ async def upload(update: Update, context: CallbackContext):
 
 # Nguess handler
 async def nguess(update: Update, context: CallbackContext):
-    if update.message.chat_id != chat:
+    if update.message.chat_id != CHAT_ID:
         return
 
     try:
@@ -61,7 +61,7 @@ async def nguess(update: Update, context: CallbackContext):
         nobi_charector = random_character["collection"]
         character_name = random_character["charector_name"]
 
-        await update.message.reply_photo(nobi_charector, caption="✨🌟 Who is this Mysterious Character?? 🧐🌟✨")
+        await Context.not.send_photo(nobi_charector, caption="✨🌟 Who is this Mysterious Character?? 🧐🌟✨")
 
         start_time = asyncio.get_event_loop().time()
         while True:
