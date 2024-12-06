@@ -42,7 +42,7 @@ async def upload(update: Update, context: CallbackContext):
         photo = await context.bot.send_photo(chat_id=LOGGER_ID, photo=image_data)
         photo_id = photo.photo[-1].file_id
 
-        collection.insert_one({"charector": photo_id, "character_name": character_name})
+        collection.insert_one({"charectors": photo_id, "character_name": character_name})
 
         await update.message.reply_text("Character uploaded successfully!")
     except aiohttp.ClientError:
