@@ -61,7 +61,7 @@ async def nguess(update: Update, context: CallbackContext):
         nobi_charector = random_character["collection"]
         character_name = random_character["charector_name"]
 
-        await Context.bot.send_photo(nobi_charector, caption="✨🌟 Who is this Mysterious Character?? 🧐🌟✨")
+        await Context.bot.send_photo(chat_id=CHAT_ID, nobi_charector, caption="✨🌟 Who is this Mysterious Character?? 🧐🌟✨")
 
         start_time = asyncio.get_event_loop().time()
         while True:
@@ -79,7 +79,7 @@ async def name(update: Update, context: CallbackContext):
         charectors = await collection.find().to_list(100000)
         for character in charectors:
             if charector["charector_name"].lower() == charector.lower():
-                await update.message.reply_text(f"🎉 Correct! You've earned 50 coins! Your current streak is {streak}! 🎉")
+                await update.message.reply_text(f"🎉 Correct! You've earned 50 bitcoins! Your current streak is {streak}! 🎉")
                 user_id = message.from_user.id
                 user_data = await user_collection.find_one({'id': user_id})
                 if user_data:
@@ -87,13 +87,13 @@ async def name(update: Update, context: CallbackContext):
                     user_data["streak"] += 1
                     if user_data["streak"] == 30:
                         user_data['Balance'] += 3000
-                        await update.message.reply_text("🎉 30-streak! Earned 3000 coins! 🎉")
+                        await update.message.reply_text("🎉 30-streak! Earned 3000 bitcoins! 🎉")
                     elif user_data["streak"] == 50:
                         user_data['Balance'] += 4000
-                        await update.message.reply_text("🎉 50-streak! Earned 4000 coins! 🎉")
+                        await update.message.reply_text("🎉 50-streak! Earned 4000 bitcoins! 🎉")
                     elif user_data["streak"] == 100:
                         user_data['Balance'] += 5000
-                        await update.message.reply_text("🎉 100-streak! Earned 5000 coins! 🎉")
+                        await update.message.reply_text("🎉 100-streak! Earned 5000 bitcoins! 🎉")
                     await user_collection.update_one({'id': user_id}, {"$set": user_data})
                 else:
                     await user_collection.insert_one({'id': user_id, 'Balance': 50, "streak": 1})
