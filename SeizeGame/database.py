@@ -18,4 +18,8 @@ user_collection = db_2["user_collection_lmaoooo"]
 
 #-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_
 collection = db_1["charectors"]
-nobita = db_1["users"]
+
+
+
+
+#####
