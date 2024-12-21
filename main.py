@@ -1,51 +1,41 @@
+import logging
 from pyrogram import Client, filters
-from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
+from pyrogram.types import Message
 import asyncio
-from motor import motor_asyncio
-from pymongo import MongoClient
+from motor.motor_asyncio import AsyncIOMotorClient
 import aiohttp
-import json
-import os
-import config
 from PIL import Image
 from io import BytesIO
-from config import BOT_TOKEN, CHAT_ID, UPLOAD_CHAT_ID, LOGGER_ID, SUDOERS
 import random
+from config import BOT_TOKEN, CHAT_ID, UPLOAD_CHAT_ID, LOGGER_ID, SUDOERS, MONGO_DB_URI, MONGO_DB_UPDATE_URI
+
+# Set up logging
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 # Client setup
 app = Client("seize", bot_token=BOT_TOKEN)
 
 # MongoDB connection
+client_1 = AsyncIOMotorClient(MONGO_DB_URI)
+db_1 = client_1['seize_collection']
+collection = db_1["characters"]
 
-#client 1 collection db url
-Client_1 = motor_asyncio.asyncIOMotorClient(config.MONGO_DB_URI)
-db_1 = Client_1['seize_collection']
-
-#client 2 coin update db url
-Client_2 = motor_asynio.asyncIOMotorClient(config.MONGO_DB_UPDATE_URI)
+client_2 = AsyncIOMotorClient(MONGO_DB_UPDATE_URI)
 db_2 = Client_2['Charector_catcher']
 
 user_collection = db_2["user_collection_lmaoooo"]
-
-
-#-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_
-collection = db_1["charectors"]
-
-
 # Upload handler
-@app.on_message(filters.command("upload"))
-async def upload(client, message):
-    if update.message.chat_id != UPLOAD_CHAT_ID or SUDOERS not in sudoers:
-        await message.reply("Ask my owner")
+@app.on_message(filters.command("upload") & filters.user(SUDOERS))
+async def upload(client, message: Message):
+    if message.chat.id != UPLOAD_CHAT_ID:
+        await message.reply("You are not allowed to use this command.")
         return
     try:
-        message_text = message.text
-        parts = message_text.split(" ", 2)
+        parts = message.text.split(" ", 2)
         if len(parts) != 3:
             await message.reply("Invalid format. Use /upload <character link> <character name>")
             return
-        character_link = parts[1]
-        character_name = parts[2]
+        character_link, character_name = parts[1], parts[2]
         async with aiohttp.ClientSession() as session:
             async with session.get(character_link) as response:
                 if response.status != 200:
@@ -58,95 +48,81 @@ async def upload(client, message):
                 image_data = image_data.getvalue()
                 photo = await app.send_photo(chat_id=LOGGER_ID, photo=image_data)
                 photo_id = photo.photo[-1].file_id
-                collection.insert_one({"charectors": photo_id, "character_name": character_name})
+                await collection.insert_one({"character_id": photo_id, "character_name": character_name})
                 await message.reply("Character uploaded successfully!")
     except Exception as e:
-        await message.reply("Error occurred! Please try again.")
+        await message.reply(f"Error occurred! Please try again. {e}")
 
-# Nguess handler
-@app.on_message(filters.command("nguess"))
-async def nguess(client, message):
-    if update.message.chat_id != CHAT_ID:
-        return
+# Guess handler
+@app.on_message(filters.command("nguess") & filters.chat(CHAT_ID))
+async def nguess(client, message: Message):
     try:
         characters = await collection.find().to_list(100000)
+        if not characters:
+            await message.reply("No characters found in the database.")
+            return
         random_character = random.choice(characters)
-        nobi_charector = random_character["charectors"]
+        character_id = random_character["character_id"]
         character_name = random_character["character_name"]
-        await app.send_photo(chat_id=CHAT_ID, photo=nobi_charector, caption="Guess the character!")
+        await app.send_photo(chat_id=CHAT_ID, photo=character_id, caption="Guess the character!")
         start_time = asyncio.get_event_loop().time()
+
         while True:
             if asyncio.get_event_loop().time() - start_time >= 20:
                 await message.reply(f"Time's up! The character was {character_name}")
                 break
             await asyncio.sleep(1)
     except Exception as e:
-        await message.reply("Error occurred! Please try again.")
-
-# Nguess handler
-@app.on_message(filters.command("nguess"))
-async def nguess(client, message):
-    if update.message.chat_id != CHAT_ID:
-        return
-    try:
-        characters = await collection.find().to_list(100000)
-        random_character = random.choice(characters)
-        nobi_charector = random_character["charectors"]
-        character_name = random_character["character_name"]
-        await app.send_photo(chat_id=CHAT_ID, photo=nobi_charector, caption="Guess the character!")
-        start_time = asyncio.get_event_loop().time()
-        while True:
-            if asyncio.get_event_loop().time() - start_time >= 20:
-                await message.reply(f"Time's up! The character was {character_name}")
-                break
-            await asyncio.sleep(1)
-    except Exception as e:
-        await message.reply("Error occurred!")
+        await message.reply(f"Error occurred! Please try again. {e}")
 
 # Name check handler
-async def name(update: Update, context: CallbackContext):
+@app.on_message(filters.text & filters.chat(CHAT_ID))
+async def name_check(client, message: Message):
     try:
-        charector = update.message.text
-        charectors = await collection.find().to_list(100000)
-        for character in charectors:
-            if charector["charector_name"].lower() == charector.lower():
-                await update.message.reply_text(f"🎉 Correct! You've earned 50 bitcoins! Your current streak is {streak}! 🎉")
+        character_name = message.text.lower()
+        characters = await collection.find().to_list(100000)
+        for character in characters:
+            if character["character_name"].lower() == character_name:
                 user_id = message.from_user.id
                 user_data = await user_collection.find_one({'id': user_id})
-                if user_data:
+                if not user_data:
+                    user_data = {'id': user_id, 'Balance': 50, "streak": 1}
+                    await user_collection.insert_one(user_data)
+                else:
                     user_data['Balance'] += 50
                     user_data["streak"] += 1
                     if user_data["streak"] == 30:
                         user_data['Balance'] += 3000
-                        await update.message.reply_text("🎉 30-streak! Earned 3000 bitcoins! 🎉")
+                        await message.reply("🎉 30-streak! Earned 3000 bitcoins! 🎉")
                     elif user_data["streak"] == 50:
                         user_data['Balance'] += 4000
-                        await update.message.reply_text("🎉 50-streak! Earned 4000 bitcoins! 🎉")
+                        await message.reply("🎉 50-streak! Earned 4000 bitcoins! 🎉")
                     elif user_data["streak"] == 100:
                         user_data['Balance'] += 5000
-                        await update.message.reply_text("🎉 100-streak! Earned 5000 bitcoins! 🎉")
+                        await message.reply("🎉 100-streak! Earned 5000 bitcoins! 🎉")
                     await user_collection.update_one({'id': user_id}, {"$set": user_data})
-                else:
-                    await user_collection.insert_one({'id': user_id, 'Balance': 50, "streak": 1})
+                await message.reply(f"🎉 Correct! You've earned 50 bitcoins! Your current streak is {user_data['streak']}! 🎉")
                 return
+        await message.reply("Incorrect! Try again.")
     except Exception as e:
-        await update.message.reply_text("error occurred")
-
+        await message.reply(f"Error occurred! {e}")
 
 # Start handler
 @app.on_message(filters.command("start"))
-async def start(client, message):
+async def start(client, message: Message):
     await message.reply("Welcome to the seize game!")
 
 # Help handler
 @app.on_message(filters.command("help"))
-async def help(client, message):
-    await message.reply("You can use the following commands:\n/start - Start the game\n/help - Show this message\n/upload - Upload a character\n/nguess - Play the guessing game\n/name - Check if a character name is correct")
-
+async def help(client, message: Message):
+    await message.reply(
+        "You can use the following commands:\n"
+        "/start - Start the game\n"
+        "/help - Show this message\n"
+        "/upload - Upload a character (Admin only)\n"
+        "/nguess - Play the guessing game\n"
+        "/name - Check if a character name is correct"
+    )
 
 if __name__ == '__main__':
-    main()
-    
-    
-    
-app.run()
+    app.run()
