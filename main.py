@@ -23,7 +23,7 @@ db_1 = client_1['seize_collection']
 collection = db_1["characters"]
 
 client_2 = AsyncIOMotorClient(MONGO_DB_UPDATE_URI)
-db_2 = Client_2['Charector_catcher']
+db_2 = client_2['Charector_catcher']
 
 user_collection = db_2["user_collection_lmaoooo"]
 # Upload handler
