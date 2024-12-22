@@ -13,11 +13,7 @@ from config import BOT_TOKEN, CHAT_ID, UPLOAD_CHAT_ID, LOGGER_ID, SUDOERS, MONGO
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 # Client setup
-app = Client(
-    "seize", 
-    api_id=config.API_ID, 
-    api_hash=config.API_HASH, 
-    bot_token=config.BOT_TOKEN
+app = Client("seize", bot_token=BOT_TOKEN)
 )
 
 
