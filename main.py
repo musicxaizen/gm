@@ -14,7 +14,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 # Client setup
 app = Client("seize", bot_token=BOT_TOKEN)
-)
+
 
 
 # MongoDB connection
