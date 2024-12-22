@@ -5,8 +5,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # API credentials
-API_ID = int(os.getenv("API_ID", ))  # Default value provided as 
-API_HASH = os.getenv("API_HASH", "")
+API_ID = int(os.getenv("API_ID", 23855030))  # Default value provided as 
+API_HASH = os.getenv("API_HASH", "b153175da5f13f048abbce89b49f80cc")
 
 # Bot token
 BOT_TOKEN = os.getenv("BOT_TOKEN", "")
@@ -18,9 +18,9 @@ SUDOERS = list(
 )  # Convert to a list of integers
 
 # Chat-related IDs
-CHAT_ID = list(map(int, os.getenv("CHAT_ID", "-1002374835450,-1002274287324").split(",")))
-UPLOAD_CHAT_ID = int(os.getenv("UPLOAD_CHAT_ID", -1002339161004))
-LOGGER_ID = int(os.getenv("LOGGER_ID", -1002342285813))
+CHAT_ID = list(map(int, os.getenv("CHAT_ID", "-1002374835450,-1002453608705").split(",")))
+UPLOAD_CHAT_ID = int(os.getenv("UPLOAD_CHAT_ID", -1002453608705))
+LOGGER_ID = int(os.getenv("LOGGER_ID", -1002453608705))
 
 # MongoDB URIs
 MONGO_DB_URI = os.getenv(
